@@ -25,6 +25,9 @@ import {
   getDiscussions,
   getClubs,
   initializeSampleData,
+  registerForEvent,
+  unregisterFromEvent,
+  isUserRegisteredForEvent,
 } from "@/lib/storage";
 import { Event, Discussion, Club } from "@/lib/types";
 import { Link } from "react-router-dom";
@@ -37,13 +40,27 @@ const Dashboard = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [viewClubOpen, setViewClubOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [userRegistrations, setUserRegistrations] = useState<{
+    [key: string]: boolean;
+  }>({});
   const { toast } = useToast();
 
   useEffect(() => {
     initializeSampleData();
-    setEvents(getEvents());
-    setDiscussions(getDiscussions());
-    setClubs(getClubs());
+    const eventsData = getEvents();
+    const discussionsData = getDiscussions();
+    const clubsData = getClubs();
+
+    setEvents(eventsData);
+    setDiscussions(discussionsData);
+    setClubs(clubsData);
+
+    // Load user registrations
+    const registrations: { [key: string]: boolean } = {};
+    eventsData.forEach((event) => {
+      registrations[event.id] = isUserRegisteredForEvent(event.id);
+    });
+    setUserRegistrations(registrations);
   }, []);
 
   const upcomingEvents = events
@@ -99,6 +116,50 @@ const Dashboard = () => {
       title: "Joined Club!",
       description: "You have successfully joined the club.",
     });
+  };
+
+  const handleEventRegister = (eventId: string) => {
+    const isRegistered = userRegistrations[eventId];
+
+    if (isRegistered) {
+      // Unregister
+      if (unregisterFromEvent(eventId)) {
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === eventId
+              ? { ...event, attendees: event.attendees - 1 }
+              : event
+          )
+        );
+        setUserRegistrations((prev) => ({ ...prev, [eventId]: false }));
+        toast({
+          title: "Registration Cancelled!",
+          description: "You have been unregistered from this event.",
+        });
+      }
+    } else {
+      // Register
+      if (registerForEvent(eventId)) {
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === eventId
+              ? { ...event, attendees: event.attendees + 1 }
+              : event
+          )
+        );
+        setUserRegistrations((prev) => ({ ...prev, [eventId]: true }));
+        toast({
+          title: "Registration Successful!",
+          description: "You have been registered for this event.",
+        });
+      } else {
+        toast({
+          title: "Registration Failed!",
+          description: "This event is full or no longer available.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const categoryColors = {
@@ -183,7 +244,12 @@ const Dashboard = () => {
           {upcomingEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onRegister={() => handleEventRegister(event.id)}
+                  isRegistered={userRegistrations[event.id]}
+                />
               ))}
             </div>
           ) : (

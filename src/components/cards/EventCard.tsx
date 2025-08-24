@@ -1,42 +1,49 @@
-import { Calendar, Clock, MapPin, Users, Tag } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Event } from '@/lib/types';
+import { Calendar, Clock, MapPin, Users, Tag } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Event } from "@/lib/types";
 
 interface EventCardProps {
   event: Event;
   onRegister?: (eventId: string) => void;
   onEdit?: (event: Event) => void;
+  isRegistered?: boolean;
 }
 
 const categoryColors = {
-  workshop: 'bg-secondary text-secondary-foreground',
-  seminar: 'bg-primary text-primary-foreground',
-  fest: 'bg-accent text-accent-foreground',
-  competition: 'bg-destructive text-destructive-foreground',
-  social: 'bg-muted text-muted-foreground',
+  workshop: "bg-secondary text-secondary-foreground",
+  seminar: "bg-primary text-primary-foreground",
+  fest: "bg-accent text-accent-foreground",
+  competition: "bg-destructive text-destructive-foreground",
+  social: "bg-muted text-muted-foreground",
 };
 
-const EventCard = ({ event, onRegister, onEdit }: EventCardProps) => {
+const EventCard = ({
+  event,
+  onRegister,
+  onEdit,
+  isRegistered = false,
+}: EventCardProps) => {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
   };
 
   const spotsLeft = event.maxAttendees - event.attendees;
   const isAlmostFull = spotsLeft <= 10;
+  const isFull = spotsLeft <= 0;
 
   return (
     <Card className="group hover:shadow-hover transition-all duration-300 animate-scale-in border-border bg-card">
@@ -50,7 +57,9 @@ const EventCard = ({ event, onRegister, onEdit }: EventCardProps) => {
               {event.description}
             </p>
           </div>
-          <Badge className={`ml-2 ${categoryColors[event.category]} capitalize`}>
+          <Badge
+            className={`ml-2 ${categoryColors[event.category]} capitalize`}
+          >
             {event.category}
           </Badge>
         </div>
@@ -92,9 +101,11 @@ const EventCard = ({ event, onRegister, onEdit }: EventCardProps) => {
         <div className="w-full bg-muted rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all duration-300 ${
-              isAlmostFull ? 'bg-destructive' : 'bg-primary'
+              isAlmostFull ? "bg-destructive" : "bg-primary"
             }`}
-            style={{ width: `${(event.attendees / event.maxAttendees) * 100}%` }}
+            style={{
+              width: `${(event.attendees / event.maxAttendees) * 100}%`,
+            }}
           />
         </div>
 
@@ -104,7 +115,11 @@ const EventCard = ({ event, onRegister, onEdit }: EventCardProps) => {
             <Tag className="w-4 h-4 text-muted-foreground" />
             <div className="flex flex-wrap gap-1">
               {event.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs px-2 py-0.5">
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="text-xs px-2 py-0.5"
+                >
                   {tag}
                 </Badge>
               ))}
@@ -119,23 +134,32 @@ const EventCard = ({ event, onRegister, onEdit }: EventCardProps) => {
 
         {/* Organizer */}
         <div className="text-xs text-muted-foreground border-t border-border pt-3">
-          Organized by <span className="font-medium text-foreground">{event.organizer}</span>
+          Organized by{" "}
+          <span className="font-medium text-foreground">{event.organizer}</span>
         </div>
 
         {/* Action Buttons */}
         <div className="flex space-x-2 pt-2">
           {onRegister && (
-            <Button 
+            <Button
               onClick={() => onRegister(event.id)}
-              className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground"
-              disabled={spotsLeft <= 0}
+              className={`flex-1 ${
+                isRegistered
+                  ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                  : "bg-primary hover:bg-primary-dark text-primary-foreground"
+              }`}
+              disabled={isFull && !isRegistered}
             >
-              {spotsLeft <= 0 ? 'Full' : 'Register'}
+              {isFull && !isRegistered
+                ? "Full"
+                : isRegistered
+                ? "Registered"
+                : "Register"}
             </Button>
           )}
           {onEdit && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onEdit(event)}
               className="border-border hover:bg-muted"
             >

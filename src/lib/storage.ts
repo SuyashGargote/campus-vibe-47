@@ -134,7 +134,7 @@ export function initializeSampleData(): void {
       {
         title: 'Tech Symposium 2024',
         description: 'Annual technology symposium featuring latest trends in AI, Web3, and Cloud Computing',
-        date: '2024-09-15',
+        date: '2024-12-15',
         time: '09:00',
         location: 'Main Auditorium',
         category: 'seminar',
@@ -146,7 +146,7 @@ export function initializeSampleData(): void {
       {
         title: 'Cultural Fest Opening',
         description: 'Grand opening ceremony for the annual cultural festival with performances and competitions',
-        date: '2024-09-20',
+        date: '2024-12-20',
         time: '18:00',
         location: 'Campus Grounds',
         category: 'fest',
@@ -154,6 +154,30 @@ export function initializeSampleData(): void {
         tags: ['Culture', 'Music', 'Dance'],
         attendees: 120,
         maxAttendees: 500,
+      },
+      {
+        title: 'AI Workshop Series',
+        description: 'Hands-on workshop on machine learning and artificial intelligence fundamentals',
+        date: '2024-12-25',
+        time: '14:00',
+        location: 'Computer Lab 101',
+        category: 'workshop',
+        organizer: 'AI Research Lab',
+        tags: ['AI', 'Machine Learning', 'Workshop'],
+        attendees: 25,
+        maxAttendees: 50,
+      },
+      {
+        title: 'Coding Competition',
+        description: 'Annual coding competition with exciting prizes and challenges',
+        date: '2024-12-30',
+        time: '10:00',
+        location: 'Innovation Center',
+        category: 'competition',
+        organizer: 'Programming Club',
+        tags: ['Coding', 'Competition', 'Prizes'],
+        attendees: 15,
+        maxAttendees: 100,
       }
     ];
     
@@ -215,12 +239,24 @@ interface UserInteractions {
   };
 }
 
+interface UserEventRegistrations {
+  [eventId: string]: boolean;
+}
+
 function getUserInteractions(): UserInteractions {
   return getFromStorage(STORAGE_KEYS.USER_INTERACTIONS, {});
 }
 
 function saveUserInteractions(interactions: UserInteractions): void {
   saveToStorage(STORAGE_KEYS.USER_INTERACTIONS, interactions);
+}
+
+function getUserEventRegistrations(): UserEventRegistrations {
+  return getFromStorage('campus_connect_user_event_registrations', {});
+}
+
+function saveUserEventRegistrations(registrations: UserEventRegistrations): void {
+  saveToStorage('campus_connect_user_event_registrations', registrations);
 }
 
 // Discussion voting functions
@@ -333,4 +369,52 @@ export function deleteReplyFromDiscussion(discussionId: string, replyId: string)
 export function getUserInteractionStatus(discussionId: string): { upvoted: boolean; downvoted: boolean } {
   const interactions = getUserInteractions();
   return interactions[discussionId] || { upvoted: false, downvoted: false };
+}
+
+// Event registration functions
+export function registerForEvent(eventId: string): boolean {
+  const events = getEvents();
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  
+  if (eventIndex === -1) return false;
+  
+  const event = events[eventIndex];
+  if (event.attendees >= event.maxAttendees) return false;
+  
+  // Update event attendees
+  events[eventIndex].attendees += 1;
+  saveEvents(events);
+  
+  // Track user registration
+  const userRegistrations = getUserEventRegistrations();
+  userRegistrations[eventId] = true;
+  saveUserEventRegistrations(userRegistrations);
+  
+  return true;
+}
+
+export function unregisterFromEvent(eventId: string): boolean {
+  const events = getEvents();
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  
+  if (eventIndex === -1) return false;
+  
+  const event = events[eventIndex];
+  if (event.attendees <= 0) return false;
+  
+  // Update event attendees
+  events[eventIndex].attendees -= 1;
+  saveEvents(events);
+  
+  // Remove user registration
+  const userRegistrations = getUserEventRegistrations();
+  delete userRegistrations[eventId];
+  saveUserEventRegistrations(userRegistrations);
+  
+  return true;
+}
+
+export function isUserRegisteredForEvent(eventId: string): boolean {
+  const userRegistrations = getUserEventRegistrations();
+  return userRegistrations[eventId] || false;
 }

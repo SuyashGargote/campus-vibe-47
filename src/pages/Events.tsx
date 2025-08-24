@@ -1,34 +1,56 @@
-import { useEffect, useState } from 'react';
-import { Plus, Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import EventCard from '@/components/cards/EventCard';
-import { getEvents, addEvent, initializeSampleData } from '@/lib/storage';
-import { Event } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { Plus, Search, Filter, Calendar as CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import EventCard from "@/components/cards/EventCard";
+import {
+  getEvents,
+  addEvent,
+  initializeSampleData,
+  registerForEvent,
+  unregisterFromEvent,
+  isUserRegisteredForEvent,
+} from "@/lib/storage";
+import { Event } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [userRegistrations, setUserRegistrations] = useState<{
+    [key: string]: boolean;
+  }>({});
   const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: '',
-    category: 'workshop' as Event['category'],
-    organizer: '',
-    tags: '',
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    category: "workshop" as Event["category"],
+    organizer: "",
+    tags: "",
     maxAttendees: 50,
   });
 
@@ -37,6 +59,13 @@ const Events = () => {
     const eventsData = getEvents();
     setEvents(eventsData);
     setFilteredEvents(eventsData);
+
+    // Load user registrations
+    const registrations: { [key: string]: boolean } = {};
+    eventsData.forEach((event) => {
+      registrations[event.id] = isUserRegisteredForEvent(event.id);
+    });
+    setUserRegistrations(registrations);
   }, []);
 
   useEffect(() => {
@@ -44,16 +73,19 @@ const Events = () => {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (event) =>
+          event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          event.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
 
     // Filter by category
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(event => event.category === categoryFilter);
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((event) => event.category === categoryFilter);
     }
 
     setFilteredEvents(filtered);
@@ -61,24 +93,27 @@ const Events = () => {
 
   const handleCreateEvent = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newEvent = addEvent({
       ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: formData.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
       attendees: 0,
     });
 
     setEvents([...events, newEvent]);
     setIsCreateDialogOpen(false);
     setFormData({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: '',
-      category: 'workshop',
-      organizer: '',
-      tags: '',
+      title: "",
+      description: "",
+      date: "",
+      time: "",
+      location: "",
+      category: "workshop",
+      organizer: "",
+      tags: "",
       maxAttendees: 50,
     });
 
@@ -89,15 +124,55 @@ const Events = () => {
   };
 
   const handleRegister = (eventId: string) => {
-    // In a real app, this would make an API call
-    toast({
-      title: "Registration Successful!",
-      description: "You have been registered for this event.",
-    });
+    const isRegistered = userRegistrations[eventId];
+
+    if (isRegistered) {
+      // Unregister
+      if (unregisterFromEvent(eventId)) {
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === eventId
+              ? { ...event, attendees: event.attendees - 1 }
+              : event
+          )
+        );
+        setUserRegistrations((prev) => ({ ...prev, [eventId]: false }));
+        toast({
+          title: "Registration Cancelled!",
+          description: "You have been unregistered from this event.",
+        });
+      }
+    } else {
+      // Register
+      if (registerForEvent(eventId)) {
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === eventId
+              ? { ...event, attendees: event.attendees + 1 }
+              : event
+          )
+        );
+        setUserRegistrations((prev) => ({ ...prev, [eventId]: true }));
+        toast({
+          title: "Registration Successful!",
+          description: "You have been registered for this event.",
+        });
+      } else {
+        toast({
+          title: "Registration Failed!",
+          description: "This event is full or no longer available.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
-  const upcomingEvents = filteredEvents.filter(event => new Date(event.date) >= new Date());
-  const pastEvents = filteredEvents.filter(event => new Date(event.date) < new Date());
+  const upcomingEvents = filteredEvents.filter(
+    (event) => new Date(event.date) >= new Date()
+  );
+  const pastEvents = filteredEvents.filter(
+    (event) => new Date(event.date) < new Date()
+  );
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -111,11 +186,15 @@ const Events = () => {
                 <span>Campus Events</span>
               </h1>
               <p className="text-xl text-muted-foreground mt-2">
-                Discover workshops, seminars, fests, and more happening on campus
+                Discover workshops, seminars, fests, and more happening on
+                campus
               </p>
             </div>
 
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover">
                   <Plus className="w-4 h-4 mr-2" />
@@ -133,7 +212,9 @@ const Events = () => {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -141,7 +222,9 @@ const Events = () => {
                       <Label htmlFor="category">Category</Label>
                       <Select
                         value={formData.category}
-                        onValueChange={(value: Event['category']) => setFormData({...formData, category: value})}
+                        onValueChange={(value: Event["category"]) =>
+                          setFormData({ ...formData, category: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -150,7 +233,9 @@ const Events = () => {
                           <SelectItem value="workshop">Workshop</SelectItem>
                           <SelectItem value="seminar">Seminar</SelectItem>
                           <SelectItem value="fest">Fest</SelectItem>
-                          <SelectItem value="competition">Competition</SelectItem>
+                          <SelectItem value="competition">
+                            Competition
+                          </SelectItem>
                           <SelectItem value="social">Social</SelectItem>
                         </SelectContent>
                       </Select>
@@ -162,7 +247,12 @@ const Events = () => {
                     <Textarea
                       id="description"
                       value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       required
                       rows={3}
                     />
@@ -175,7 +265,9 @@ const Events = () => {
                         id="date"
                         type="date"
                         value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, date: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -185,7 +277,9 @@ const Events = () => {
                         id="time"
                         type="time"
                         value={formData.time}
-                        onChange={(e) => setFormData({...formData, time: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, time: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -195,7 +289,12 @@ const Events = () => {
                         id="maxAttendees"
                         type="number"
                         value={formData.maxAttendees}
-                        onChange={(e) => setFormData({...formData, maxAttendees: parseInt(e.target.value)})}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            maxAttendees: parseInt(e.target.value),
+                          })
+                        }
                         required
                         min="1"
                       />
@@ -208,7 +307,9 @@ const Events = () => {
                       <Input
                         id="location"
                         value={formData.location}
-                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, location: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -217,7 +318,12 @@ const Events = () => {
                       <Input
                         id="organizer"
                         value={formData.organizer}
-                        onChange={(e) => setFormData({...formData, organizer: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            organizer: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -228,7 +334,9 @@ const Events = () => {
                     <Input
                       id="tags"
                       value={formData.tags}
-                      onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
                       placeholder="e.g., AI, Technology, Innovation"
                     />
                   </div>
@@ -241,7 +349,10 @@ const Events = () => {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-primary hover:bg-primary-dark">
+                    <Button
+                      type="submit"
+                      className="bg-primary hover:bg-primary-dark"
+                    >
                       Create Event
                     </Button>
                   </div>
@@ -282,7 +393,7 @@ const Events = () => {
 
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Upcoming Events ({upcomingEvents.length})
             </h2>
@@ -292,6 +403,7 @@ const Events = () => {
                   key={event.id}
                   event={event}
                   onRegister={handleRegister}
+                  isRegistered={userRegistrations[event.id]}
                 />
               ))}
             </div>
@@ -300,7 +412,7 @@ const Events = () => {
 
         {/* Past Events */}
         {pastEvents.length > 0 && (
-          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Past Events ({pastEvents.length})
             </h2>
@@ -316,11 +428,13 @@ const Events = () => {
         {filteredEvents.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
             <CalendarIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No events found</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              No events found
+            </h3>
             <p className="text-muted-foreground">
-              {searchTerm || categoryFilter !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Be the first to create an event!'}
+              {searchTerm || categoryFilter !== "all"
+                ? "Try adjusting your search or filters"
+                : "Be the first to create an event!"}
             </p>
           </div>
         )}
