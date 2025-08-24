@@ -6,53 +6,54 @@
 
 @layer base {
   :root {
-    /* Core Campus Colors */
-    --background: 247 249 252;
-    --foreground: 217 19% 15%;
+    /* Creative Minimal Colors */
+    --background: 0 0% 100%;
+    --foreground: 214 15% 29%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 19% 15%;
+    --card-foreground: 214 15% 29%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 19% 15%;
+    --popover-foreground: 214 15% 29%;
 
-    /* Academic Blue Theme */
-    --primary: 220 89% 60%;
+    /* Primary Blue */
+    --primary: 218 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 220 89% 75%;
-    --primary-dark: 220 89% 45%;
+    --primary-light: 218 83% 68%;
+    --primary-dark: 218 83% 38%;
 
-    /* Campus Accent Colors */
-    --secondary: 142 76% 36%;
+    /* Secondary Pink */
+    --secondary: 322 83% 72%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 142 76% 55%;
+    --secondary-light: 322 83% 82%;
 
-    --accent: 267 84% 81%;
-    --accent-foreground: 267 84% 25%;
-    --accent-light: 267 84% 90%;
+    /* Accent Cyan */
+    --accent: 188 95% 43%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 188 95% 58%;
 
     /* Neutral Tones */
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 214 15% 46%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 89% 60%;
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
+    --ring: 218 83% 53%;
 
     --radius: 0.75rem;
     
-    /* Campus Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(220 89% 60%), hsl(267 84% 81%));
-    --gradient-secondary: linear-gradient(135deg, hsl(142 76% 36%), hsl(220 89% 60%));
-    --gradient-accent: linear-gradient(135deg, hsl(267 84% 81%), hsl(220 89% 75%));
+    /* Creative Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(218 83% 53%), hsl(188 95% 43%));
+    --gradient-secondary: linear-gradient(135deg, hsl(322 83% 72%), hsl(218 83% 53%));
+    --gradient-accent: linear-gradient(135deg, hsl(188 95% 43%), hsl(322 83% 72%));
     
-    /* Campus Shadows */
-    --shadow-card: 0 4px 6px -1px hsl(220 89% 60% / 0.1), 0 2px 4px -1px hsl(220 89% 60% / 0.06);
-    --shadow-hover: 0 10px 25px -3px hsl(220 89% 60% / 0.1), 0 4px 6px -2px hsl(220 89% 60% / 0.05);
-    --shadow-focus: 0 0 0 3px hsl(220 89% 60% / 0.3);
+    /* Modern Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(218 83% 53% / 0.1), 0 2px 4px -1px hsl(218 83% 53% / 0.06);
+    --shadow-hover: 0 10px 25px -3px hsl(218 83% 53% / 0.1), 0 4px 6px -2px hsl(218 83% 53% / 0.05);
+    --shadow-focus: 0 0 0 3px hsl(218 83% 53% / 0.3);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -76,38 +77,38 @@
   }
 
   .dark {
-    /* Campus Dark Theme */
-    --background: 222 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Creative Minimal Dark Theme */
+    --background: 220 24% 17%;
+    --foreground: 0 0% 95%;
 
-    --card: 222 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 24% 17%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 24% 17%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 220 89% 70%;
-    --primary-foreground: 222 84% 4.9%;
-    --primary-light: 220 89% 80%;
-    --primary-dark: 220 89% 55%;
+    --primary: 218 83% 63%;
+    --primary-foreground: 220 24% 17%;
+    --primary-light: 218 83% 73%;
+    --primary-dark: 218 83% 48%;
 
-    --secondary: 142 76% 45%;
-    --secondary-foreground: 210 40% 98%;
-    --secondary-light: 142 76% 60%;
+    --secondary: 322 83% 77%;
+    --secondary-foreground: 220 24% 17%;
+    --secondary-light: 322 83% 87%;
 
-    --accent: 267 84% 75%;
-    --accent-foreground: 267 84% 15%;
-    --accent-light: 267 84% 85%;
+    --accent: 188 95% 53%;
+    --accent-foreground: 220 24% 17%;
+    --accent-light: 188 95% 63%;
 
-    --muted: 217 32% 17.5%;
-    --muted-foreground: 215 20% 65.1%;
+    --muted: 220 24% 25%;
+    --muted-foreground: 0 0% 65%;
 
-    --destructive: 0 62% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 32% 17.5%;
-    --input: 217 32% 17.5%;
-    --ring: 220 89% 70%;
+    --border: 220 24% 25%;
+    --input: 220 24% 25%;
+    --ring: 218 83% 63%;
   }
 }
 
