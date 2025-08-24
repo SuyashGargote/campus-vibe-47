@@ -1,4 +1,4 @@
-import { Event, Discussion, Club, User } from './types';
+import { Event, Discussion, Club, User, Reply } from './types';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   DISCUSSIONS: 'campus_connect_discussions',
   CLUBS: 'campus_connect_clubs',
   USER: 'campus_connect_user',
+  USER_INTERACTIONS: 'campus_connect_user_interactions',
 } as const;
 
 // Generic storage functions
@@ -90,6 +91,15 @@ export function addDiscussion(discussion: Omit<Discussion, 'id' | 'upvotes' | 'd
   discussions.push(newDiscussion);
   saveDiscussions(discussions);
   return newDiscussion;
+}
+
+export function deleteDiscussion(id: string): boolean {
+  const discussions = getDiscussions();
+  const filtered = discussions.filter(d => d.id !== id);
+  if (filtered.length === discussions.length) return false;
+  
+  saveDiscussions(filtered);
+  return true;
 }
 
 // Clubs
@@ -195,4 +205,132 @@ export function initializeSampleData(): void {
     
     sampleClubs.forEach(addClub);
   }
+}
+
+// User interactions tracking
+interface UserInteractions {
+  [discussionId: string]: {
+    upvoted: boolean;
+    downvoted: boolean;
+  };
+}
+
+function getUserInteractions(): UserInteractions {
+  return getFromStorage(STORAGE_KEYS.USER_INTERACTIONS, {});
+}
+
+function saveUserInteractions(interactions: UserInteractions): void {
+  saveToStorage(STORAGE_KEYS.USER_INTERACTIONS, interactions);
+}
+
+// Discussion voting functions
+export function upvoteDiscussion(discussionId: string): boolean {
+  const discussions = getDiscussions();
+  const interactions = getUserInteractions();
+  const discussionIndex = discussions.findIndex(d => d.id === discussionId);
+  
+  if (discussionIndex === -1) return false;
+  
+  const discussion = discussions[discussionIndex];
+  const userInteraction = interactions[discussionId] || { upvoted: false, downvoted: false };
+  
+  // If user already upvoted, remove the upvote
+  if (userInteraction.upvoted) {
+    discussion.upvotes--;
+    userInteraction.upvoted = false;
+  } else {
+    // If user downvoted before, remove downvote and add upvote
+    if (userInteraction.downvoted) {
+      discussion.downvotes--;
+      userInteraction.downvoted = false;
+    }
+    discussion.upvotes++;
+    userInteraction.upvoted = true;
+  }
+  
+  discussion.updatedAt = new Date().toISOString();
+  discussions[discussionIndex] = discussion;
+  
+  interactions[discussionId] = userInteraction;
+  
+  saveDiscussions(discussions);
+  saveUserInteractions(interactions);
+  return true;
+}
+
+export function downvoteDiscussion(discussionId: string): boolean {
+  const discussions = getDiscussions();
+  const interactions = getUserInteractions();
+  const discussionIndex = discussions.findIndex(d => d.id === discussionId);
+  
+  if (discussionIndex === -1) return false;
+  
+  const discussion = discussions[discussionIndex];
+  const userInteraction = interactions[discussionId] || { upvoted: false, downvoted: false };
+  
+  // If user already downvoted, remove the downvote
+  if (userInteraction.downvoted) {
+    discussion.downvotes--;
+    userInteraction.downvoted = false;
+  } else {
+    // If user upvoted before, remove upvote and add downvote
+    if (userInteraction.upvoted) {
+      discussion.upvotes--;
+      userInteraction.upvoted = false;
+    }
+    discussion.downvotes++;
+    userInteraction.downvoted = true;
+  }
+  
+  discussion.updatedAt = new Date().toISOString();
+  discussions[discussionIndex] = discussion;
+  
+  interactions[discussionId] = userInteraction;
+  
+  saveDiscussions(discussions);
+  saveUserInteractions(interactions);
+  return true;
+}
+
+export function addReplyToDiscussion(discussionId: string, reply: Omit<Reply, 'id' | 'createdAt'>): Reply | null {
+  const discussions = getDiscussions();
+  const discussionIndex = discussions.findIndex(d => d.id === discussionId);
+  
+  if (discussionIndex === -1) return null;
+  
+  const newReply: Reply = {
+    ...reply,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  };
+  
+  discussions[discussionIndex].replies.push(newReply);
+  discussions[discussionIndex].updatedAt = new Date().toISOString();
+  
+  saveDiscussions(discussions);
+  return newReply;
+}
+
+export function deleteReplyFromDiscussion(discussionId: string, replyId: string): boolean {
+  const discussions = getDiscussions();
+  const discussionIndex = discussions.findIndex(d => d.id === discussionId);
+  
+  if (discussionIndex === -1) return false;
+  
+  const discussion = discussions[discussionIndex];
+  const replyIndex = discussion.replies.findIndex(r => r.id === replyId);
+  
+  if (replyIndex === -1) return false;
+  
+  discussion.replies.splice(replyIndex, 1);
+  discussion.updatedAt = new Date().toISOString();
+  
+  discussions[discussionIndex] = discussion;
+  saveDiscussions(discussions);
+  return true;
+}
+
+export function getUserInteractionStatus(discussionId: string): { upvoted: boolean; downvoted: boolean } {
+  const interactions = getUserInteractions();
+  return interactions[discussionId] || { upvoted: false, downvoted: false };
 }

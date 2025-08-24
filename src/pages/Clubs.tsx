@@ -1,34 +1,57 @@
-import { useEffect, useState } from 'react';
-import { Plus, Users, Search, Filter, Mail, Phone, ExternalLink, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getClubs, addClub, initializeSampleData } from '@/lib/storage';
-import { Club } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import {
+  Plus,
+  Users,
+  Search,
+  Filter,
+  Mail,
+  Phone,
+  ExternalLink,
+  Calendar,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { getClubs, addClub, initializeSampleData } from "@/lib/storage";
+import { Club } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 const Clubs = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [filteredClubs, setFilteredClubs] = useState<Club[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [viewClubOpen, setViewClubOpen] = useState(false);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'technical' as Club['category'],
-    email: '',
-    phone: '',
-    social: '',
-    activities: '',
+    name: "",
+    description: "",
+    category: "technical" as Club["category"],
+    email: "",
+    phone: "",
+    social: "",
+    activities: "",
   });
 
   useEffect(() => {
@@ -43,16 +66,19 @@ const Clubs = () => {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(club =>
-        club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club.activities.some(activity => activity.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (club) =>
+          club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          club.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          club.activities.some((activity) =>
+            activity.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
 
     // Filter by category
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(club => club.category === categoryFilter);
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((club) => club.category === categoryFilter);
     }
 
     // Sort by member count (most popular first)
@@ -63,7 +89,7 @@ const Clubs = () => {
 
   const handleCreateClub = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newClub = addClub({
       ...formData,
       contact: {
@@ -72,20 +98,23 @@ const Clubs = () => {
         social: formData.social || undefined,
       },
       members: 1, // Creator is the first member
-      activities: formData.activities.split(',').map(activity => activity.trim()).filter(Boolean),
+      activities: formData.activities
+        .split(",")
+        .map((activity) => activity.trim())
+        .filter(Boolean),
       upcomingEvents: [],
     });
 
     setClubs([newClub, ...clubs]);
     setIsCreateDialogOpen(false);
     setFormData({
-      name: '',
-      description: '',
-      category: 'technical',
-      email: '',
-      phone: '',
-      social: '',
-      activities: '',
+      name: "",
+      description: "",
+      category: "technical",
+      email: "",
+      phone: "",
+      social: "",
+      activities: "",
     });
 
     toast({
@@ -102,13 +131,18 @@ const Clubs = () => {
     });
   };
 
+  const handleViewClub = (club: Club) => {
+    setSelectedClub(club);
+    setViewClubOpen(true);
+  };
+
   const categoryColors = {
-    technical: 'bg-primary text-primary-foreground',
-    cultural: 'bg-accent text-accent-foreground',
-    sports: 'bg-secondary text-secondary-foreground',
-    academic: 'bg-muted text-muted-foreground',
-    social: 'bg-destructive text-destructive-foreground',
-    other: 'bg-border text-foreground',
+    technical: "bg-primary text-primary-foreground",
+    cultural: "bg-accent text-accent-foreground",
+    sports: "bg-secondary text-secondary-foreground",
+    academic: "bg-muted text-muted-foreground",
+    social: "bg-destructive text-destructive-foreground",
+    other: "bg-border text-foreground",
   };
 
   return (
@@ -127,7 +161,10 @@ const Clubs = () => {
               </p>
             </div>
 
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button className="bg-accent hover:bg-accent-light text-accent-foreground shadow-hover">
                   <Plus className="w-4 h-4 mr-2" />
@@ -145,7 +182,9 @@ const Clubs = () => {
                       <Input
                         id="name"
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -153,7 +192,9 @@ const Clubs = () => {
                       <Label htmlFor="category">Category</Label>
                       <Select
                         value={formData.category}
-                        onValueChange={(value: Club['category']) => setFormData({...formData, category: value})}
+                        onValueChange={(value: Club["category"]) =>
+                          setFormData({ ...formData, category: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -175,7 +216,12 @@ const Clubs = () => {
                     <Textarea
                       id="description"
                       value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       required
                       rows={3}
                       placeholder="Describe your club's mission and activities..."
@@ -183,11 +229,15 @@ const Clubs = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="activities">Activities (comma-separated)</Label>
+                    <Label htmlFor="activities">
+                      Activities (comma-separated)
+                    </Label>
                     <Textarea
                       id="activities"
                       value={formData.activities}
-                      onChange={(e) => setFormData({...formData, activities: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, activities: e.target.value })
+                      }
                       required
                       rows={2}
                       placeholder="e.g., Weekly meetings, Workshops, Competitions"
@@ -198,30 +248,42 @@ const Clubs = () => {
                     <Label>Contact Information</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="email" className="text-sm">Email</Label>
+                        <Label htmlFor="email" className="text-sm">
+                          Email
+                        </Label>
                         <Input
                           id="email"
                           type="email"
                           value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
                           required
                         />
                       </div>
                       <div>
-                        <Label htmlFor="phone" className="text-sm">Phone (optional)</Label>
+                        <Label htmlFor="phone" className="text-sm">
+                          Phone (optional)
+                        </Label>
                         <Input
                           id="phone"
                           value={formData.phone}
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
                         />
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="social" className="text-sm">Social Media (optional)</Label>
+                      <Label htmlFor="social" className="text-sm">
+                        Social Media (optional)
+                      </Label>
                       <Input
                         id="social"
                         value={formData.social}
-                        onChange={(e) => setFormData({...formData, social: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, social: e.target.value })
+                        }
                         placeholder="@club_handle or website URL"
                       />
                     </div>
@@ -235,7 +297,10 @@ const Clubs = () => {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-accent hover:bg-accent-light">
+                    <Button
+                      type="submit"
+                      className="bg-accent hover:bg-accent-light"
+                    >
                       Create Club
                     </Button>
                   </div>
@@ -276,15 +341,24 @@ const Clubs = () => {
         </div>
 
         {/* Clubs Grid */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
           {filteredClubs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredClubs.map((club) => (
-                <Card key={club.id} className="hover:shadow-hover transition-all duration-300 border-border">
+                <Card
+                  key={club.id}
+                  className="hover:shadow-hover transition-all duration-300 border-border"
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl text-foreground">{club.name}</CardTitle>
-                      <Badge className={`${categoryColors[club.category]} capitalize`}>
+                      <CardTitle className="text-xl text-foreground">
+                        {club.name}
+                      </CardTitle>
+                      <Badge
+                        className={`${
+                          categoryColors[club.category]
+                        } capitalize`}
+                      >
                         {club.category}
                       </Badge>
                     </div>
@@ -304,10 +378,15 @@ const Clubs = () => {
 
                     {/* Activities */}
                     <div>
-                      <h4 className="text-sm font-medium text-foreground mb-2">Activities:</h4>
+                      <h4 className="text-sm font-medium text-foreground mb-2">
+                        Activities:
+                      </h4>
                       <div className="space-y-1">
                         {club.activities.slice(0, 3).map((activity, index) => (
-                          <div key={index} className="text-sm text-muted-foreground flex items-center">
+                          <div
+                            key={index}
+                            className="text-sm text-muted-foreground flex items-center"
+                          >
                             <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
                             {activity}
                           </div>
@@ -346,22 +425,33 @@ const Clubs = () => {
                         <div className="mb-3">
                           <div className="flex items-center space-x-2 mb-1">
                             <Calendar className="w-3 h-3 text-secondary" />
-                            <span className="text-xs font-medium text-foreground">Upcoming Events:</span>
+                            <span className="text-xs font-medium text-foreground">
+                              Upcoming Events:
+                            </span>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {club.upcomingEvents.slice(0, 2).join(', ')}
-                            {club.upcomingEvents.length > 2 && ' +more'}
+                            {club.upcomingEvents.slice(0, 2).join(", ")}
+                            {club.upcomingEvents.length > 2 && " +more"}
                           </div>
                         </div>
                       )}
 
-                      {/* Action Button */}
-                      <Button 
-                        onClick={() => handleJoinClub(club.id)}
-                        className="w-full bg-accent hover:bg-accent-light text-accent-foreground"
-                      >
-                        Join Club
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => handleViewClub(club)}
+                          variant="outline"
+                          className="flex-1 border-border hover:bg-muted"
+                        >
+                          View Club
+                        </Button>
+                        <Button
+                          onClick={() => handleJoinClub(club.id)}
+                          className="flex-1 bg-accent hover:bg-accent-light text-accent-foreground"
+                        >
+                          Join Club
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -370,15 +460,176 @@ const Clubs = () => {
           ) : (
             <div className="text-center py-12 animate-fade-in">
               <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">No clubs found</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                No clubs found
+              </h3>
               <p className="text-muted-foreground">
-                {searchTerm || categoryFilter !== 'all'
-                  ? 'Try adjusting your search or filters'
-                  : 'Be the first to create a club!'}
+                {searchTerm || categoryFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Be the first to create a club!"}
               </p>
             </div>
           )}
         </div>
+
+        {/* View Club Dialog */}
+        <Dialog open={viewClubOpen} onOpenChange={setViewClubOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Club Details</DialogTitle>
+            </DialogHeader>
+            {selectedClub && (
+              <div className="space-y-6">
+                {/* Club Header */}
+                <div className="border-b border-border pb-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-foreground mb-2">
+                        {selectedClub.name}
+                      </h2>
+                      <div className="flex items-center space-x-3">
+                        <Badge
+                          className={`${
+                            categoryColors[selectedClub.category]
+                          } capitalize`}
+                        >
+                          {selectedClub.category}
+                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Users className="w-4 h-4 text-primary" />
+                          <span className="text-sm text-muted-foreground">
+                            {selectedClub.members} members
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleJoinClub(selectedClub.id)}
+                      className="bg-accent hover:bg-accent-light text-accent-foreground"
+                    >
+                      Join Club
+                    </Button>
+                  </div>
+
+                  {/* Club Description */}
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-foreground leading-relaxed">
+                      {selectedClub.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Activities Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Activities ({selectedClub.activities.length})
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedClub.activities.map((activity, index) => (
+                      <div
+                        key={index}
+                        className="bg-muted/50 rounded-lg p-4 border border-border"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-primary rounded-full" />
+                          <span className="text-sm font-medium text-foreground">
+                            {activity}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Mail className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-foreground">
+                          Email
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedClub.contact.email}
+                      </p>
+                    </div>
+                    {selectedClub.contact.phone && (
+                      <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Phone className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-foreground">
+                            Phone
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedClub.contact.phone}
+                        </p>
+                      </div>
+                    )}
+                    {selectedClub.contact.social && (
+                      <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <ExternalLink className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-foreground">
+                            Social Media
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedClub.contact.social}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upcoming Events */}
+                {selectedClub.upcomingEvents.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Upcoming Events ({selectedClub.upcomingEvents.length})
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedClub.upcomingEvents.map((event, index) => (
+                        <div
+                          key={index}
+                          className="bg-muted/50 rounded-lg p-4 border border-border"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-secondary" />
+                            <span className="text-sm font-medium text-foreground">
+                              {event}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Join Club Section */}
+                <div className="border-t border-border pt-4">
+                  <div className="text-center">
+                    <p className="text-muted-foreground mb-4">
+                      Interested in joining this club? Click the button above to
+                      become a member!
+                    </p>
+                    <Button
+                      onClick={() => handleJoinClub(selectedClub.id)}
+                      className="bg-accent hover:bg-accent-light text-accent-foreground"
+                    >
+                      Join {selectedClub.name}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
