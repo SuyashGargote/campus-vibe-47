@@ -231,6 +231,19 @@ export function initializeSampleData(): void {
   }
 }
 
+// Force refresh data with updated club names
+export function forceRefreshData(): void {
+  // Clear all existing data
+  localStorage.removeItem(STORAGE_KEYS.EVENTS);
+  localStorage.removeItem(STORAGE_KEYS.DISCUSSIONS);
+  localStorage.removeItem(STORAGE_KEYS.CLUBS);
+  localStorage.removeItem(STORAGE_KEYS.USER_INTERACTIONS);
+  localStorage.removeItem('campus_connect_user_event_registrations');
+  
+  // Reinitialize with fresh data
+  initializeSampleData();
+}
+
 // User interactions tracking
 interface UserInteractions {
   [discussionId: string]: {

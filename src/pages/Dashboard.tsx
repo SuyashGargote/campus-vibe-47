@@ -28,6 +28,7 @@ import {
   registerForEvent,
   unregisterFromEvent,
   isUserRegisteredForEvent,
+  forceRefreshData,
 } from "@/lib/storage";
 import { Event, Discussion, Club } from "@/lib/types";
 import { Link } from "react-router-dom";
@@ -45,16 +46,17 @@ const Dashboard = () => {
   }>({});
   const { toast } = useToast();
 
-  useEffect(() => {
-    initializeSampleData();
+    useEffect(() => {
+    // Force refresh data to ensure updated club names are displayed
+    forceRefreshData();
     const eventsData = getEvents();
     const discussionsData = getDiscussions();
     const clubsData = getClubs();
-
+    
     setEvents(eventsData);
     setDiscussions(discussionsData);
     setClubs(clubsData);
-
+    
     // Load user registrations
     const registrations: { [key: string]: boolean } = {};
     eventsData.forEach((event) => {

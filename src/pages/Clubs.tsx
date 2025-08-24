@@ -29,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getClubs, addClub, initializeSampleData } from "@/lib/storage";
+import { getClubs, addClub, initializeSampleData, forceRefreshData } from '@/lib/storage';
 import { Club } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,7 +55,8 @@ const Clubs = () => {
   });
 
   useEffect(() => {
-    initializeSampleData();
+    // Force refresh data to ensure updated club names are displayed
+    forceRefreshData();
     const clubsData = getClubs();
     setClubs(clubsData);
     setFilteredClubs(clubsData);
