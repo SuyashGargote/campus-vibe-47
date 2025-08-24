@@ -208,10 +208,10 @@ export function initializeSampleData(): void {
   if (clubs.length === 0) {
     const sampleClubs: Omit<Club, 'id' | 'createdAt'>[] = [
       {
-        name: 'Coding Club',
+        name: 'CSI PCE',
         description: 'A community for programming enthusiasts to learn, share, and build amazing projects together.',
         category: 'technical',
-        contact: { email: 'codingclub@campus.edu', social: '@campus_coding' },
+        contact: { email: 'csipce@campus.edu', social: '@csi_pce' },
         members: 156,
         activities: ['Weekly coding sessions', 'Hackathons', 'Tech talks', 'Open source contributions'],
         upcomingEvents: ['Hackathon 2024', 'JavaScript Workshop'],
