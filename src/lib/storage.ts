@@ -178,6 +178,30 @@ export function initializeSampleData(): void {
         tags: ['Coding', 'Competition', 'Prizes'],
         attendees: 15,
         maxAttendees: 100,
+      },
+      {
+        title: 'Spring Hackathon 2025',
+        description: 'Join us for an exciting 24-hour hackathon with amazing prizes and networking opportunities',
+        date: '2025-01-15',
+        time: '09:00',
+        location: 'Innovation Hub',
+        category: 'hackathon',
+        organizer: 'Tech Innovation Club',
+        tags: ['Hackathon', 'Innovation', 'Networking'],
+        attendees: 8,
+        maxAttendees: 150,
+      },
+      {
+        title: 'Career Fair 2025',
+        description: 'Connect with top companies and explore internship and job opportunities',
+        date: '2025-01-20',
+        time: '10:00',
+        location: 'Main Hall',
+        category: 'career',
+        organizer: 'Career Services',
+        tags: ['Career', 'Jobs', 'Internships'],
+        attendees: 45,
+        maxAttendees: 300,
       }
     ];
     
