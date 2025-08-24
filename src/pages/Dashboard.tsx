@@ -33,6 +33,7 @@ import {
 import { Event, Discussion, Club } from "@/lib/types";
 import { Link } from "react-router-dom";
 import campusHero from "@/assets/campus-hero.jpg";
+import csiLogo from "@/assets/CSI-WHITE-RED-LOGO.svg";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -345,16 +346,25 @@ const Dashboard = () => {
                 key={club.id}
                 className="hover:shadow-hover transition-all duration-300 border-border"
               >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg text-foreground">
-                      {club.name}
-                    </CardTitle>
-                    <Badge className="bg-accent text-accent-foreground capitalize">
-                      {club.category}
-                    </Badge>
-                  </div>
-                </CardHeader>
+                                 <CardHeader>
+                   <div className="flex items-start justify-between">
+                     <div className="flex items-center space-x-2">
+                       {club.name === "CSI PCE" && (
+                         <img 
+                           src={csiLogo} 
+                           alt="CSI PCE Logo" 
+                           className="w-6 h-6 object-contain"
+                         />
+                       )}
+                       <CardTitle className="text-lg text-foreground">
+                         {club.name}
+                       </CardTitle>
+                     </div>
+                     <Badge className="bg-accent text-accent-foreground capitalize">
+                       {club.category}
+                     </Badge>
+                   </div>
+                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4 line-clamp-2">
                     {club.description}
@@ -388,15 +398,24 @@ const Dashboard = () => {
           {selectedClub && (
             <>
               <DialogHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <DialogTitle className="text-2xl font-bold text-foreground">
-                      {selectedClub.name}
-                    </DialogTitle>
-                    <p className="text-muted-foreground mt-2">
-                      {selectedClub.description}
-                    </p>
-                  </div>
+                                 <div className="flex items-start justify-between">
+                   <div>
+                     <div className="flex items-center space-x-3 mb-2">
+                       {selectedClub.name === "CSI PCE" && (
+                         <img 
+                           src={csiLogo} 
+                           alt="CSI PCE Logo" 
+                           className="w-10 h-10 object-contain"
+                         />
+                       )}
+                       <DialogTitle className="text-2xl font-bold text-foreground">
+                         {selectedClub.name}
+                       </DialogTitle>
+                     </div>
+                     <p className="text-muted-foreground mt-2">
+                       {selectedClub.description}
+                     </p>
+                   </div>
                   <div className="flex items-center space-x-3">
                     <Badge
                       className={`${

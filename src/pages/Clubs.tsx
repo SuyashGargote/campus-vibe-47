@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { getClubs, addClub, initializeSampleData, forceRefreshData } from '@/lib/storage';
 import { Club } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import csiLogo from "@/assets/CSI-WHITE-RED-LOGO.svg";
 
 const Clubs = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -350,20 +351,29 @@ const Clubs = () => {
                   key={club.id}
                   className="hover:shadow-hover transition-all duration-300 border-border"
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl text-foreground">
-                        {club.name}
-                      </CardTitle>
-                      <Badge
-                        className={`${
-                          categoryColors[club.category]
-                        } capitalize`}
-                      >
-                        {club.category}
-                      </Badge>
-                    </div>
-                  </CardHeader>
+                                     <CardHeader>
+                     <div className="flex items-start justify-between">
+                       <div className="flex items-center space-x-2">
+                         {club.name === "CSI PCE" && (
+                           <img 
+                             src={csiLogo} 
+                             alt="CSI PCE Logo" 
+                             className="w-8 h-8 object-contain"
+                           />
+                         )}
+                         <CardTitle className="text-xl text-foreground">
+                           {club.name}
+                         </CardTitle>
+                       </div>
+                       <Badge
+                         className={`${
+                           categoryColors[club.category]
+                         } capitalize`}
+                       >
+                         {club.category}
+                       </Badge>
+                     </div>
+                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-muted-foreground line-clamp-3">
                       {club.description}
@@ -483,11 +493,20 @@ const Clubs = () => {
               <div className="space-y-6">
                 {/* Club Header */}
                 <div className="border-b border-border pb-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-foreground mb-2">
-                        {selectedClub.name}
-                      </h2>
+                                     <div className="flex items-start justify-between mb-3">
+                     <div className="flex-1">
+                       <div className="flex items-center space-x-3 mb-2">
+                         {selectedClub.name === "CSI PCE" && (
+                           <img 
+                             src={csiLogo} 
+                             alt="CSI PCE Logo" 
+                             className="w-12 h-12 object-contain"
+                           />
+                         )}
+                         <h2 className="text-2xl font-bold text-foreground">
+                           {selectedClub.name}
+                         </h2>
+                       </div>
                       <div className="flex items-center space-x-3">
                         <Badge
                           className={`${
