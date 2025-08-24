@@ -2,41 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Campus Connect Portal Design System - Academic & Modern */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Campus Colors */
+    --background: 247 249 252;
+    --foreground: 217 19% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 217 19% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 217 19% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Academic Blue Theme */
+    --primary: 220 89% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 220 89% 75%;
+    --primary-dark: 220 89% 45%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Campus Accent Colors */
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 142 76% 55%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 267 84% 81%;
+    --accent-foreground: 267 84% 25%;
+    --accent-light: 267 84% 90%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Neutral Tones */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 89% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    
+    /* Campus Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 89% 60%), hsl(267 84% 81%));
+    --gradient-secondary: linear-gradient(135deg, hsl(142 76% 36%), hsl(220 89% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(267 84% 81%), hsl(220 89% 75%));
+    
+    /* Campus Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(220 89% 60% / 0.1), 0 2px 4px -1px hsl(220 89% 60% / 0.06);
+    --shadow-hover: 0 10px 25px -3px hsl(220 89% 60% / 0.1), 0 4px 6px -2px hsl(220 89% 60% / 0.05);
+    --shadow-focus: 0 0 0 3px hsl(220 89% 60% / 0.3);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +76,38 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Campus Dark Theme */
+    --background: 222 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 220 89% 70%;
+    --primary-foreground: 222 84% 4.9%;
+    --primary-light: 220 89% 80%;
+    --primary-dark: 220 89% 55%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 142 76% 45%;
     --secondary-foreground: 210 40% 98%;
+    --secondary-light: 142 76% 60%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 267 84% 75%;
+    --accent-foreground: 267 84% 15%;
+    --accent-light: 267 84% 85%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 217 32% 17.5%;
+    --muted-foreground: 215 20% 65.1%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 217 32% 17.5%;
+    --input: 217 32% 17.5%;
+    --ring: 220 89% 70%;
   }
 }
 
